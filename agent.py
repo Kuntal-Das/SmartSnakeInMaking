@@ -1,8 +1,6 @@
-from configparser import NoSectionError
-from random import random
-from statistics import mean
 import torch
 import random
+import os
 import numpy as np
 from collections import deque
 from snake_game import SnakeGameAI, Direction, Point
@@ -16,15 +14,18 @@ LR = 0.001
 
 class Agent:
 
-    def __init__(self):
+    def __init__(self, model_file_path='./model/model.pth'):
         self.n_games = 0
         self.epsilon = 0  # randomrate
         self.gama = 0.9  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)
 
-        # TODO: model, trainer
         self.model = Linear_Qnet(11, 256, 3)
         self.trainer = QTrainer(self.model, LR, self.gama)
+
+        if os.path.exists(model_file_path):
+            self.model.load_state_dict(torch.load(model_file_path))  # .\model\model.pth
+            self.model.eval()
 
     def get_state(self, game):
         head = game.snake[0]
