@@ -1,5 +1,6 @@
 from configparser import NoSectionError
 from random import random
+from statistics import mean
 import torch
 import random
 import numpy as np
@@ -114,7 +115,7 @@ def train():
 
     while True:
         # get current state
-        curr_state = agent.get_state()
+        curr_state = agent.get_state(game)
 
         # get move
         final_move = agent.get_action(curr_state)
@@ -145,6 +146,7 @@ def train():
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
 
 

@@ -47,7 +47,7 @@ class QTrainer:
 
         if len(t_state.shape) == 1:
             # (1, x)
-            t_state = torch.unsqueeze(state, 0)
+            t_state = torch.unsqueeze(t_state, 0)
             t_next_state = torch.unsqueeze(t_next_state, 0)
             t_action = torch.unsqueeze(t_action, 0)
             t_reward = torch.unsqueeze(t_reward, 0)
@@ -57,12 +57,12 @@ class QTrainer:
         pred = self.model(t_state)
 
         target = pred.clone()
-        for i in range(len(done)):
-            Q_new = reward[i]
-            if not done[i]:
-                Q_new += self.gama * torch.max(self.model(next_state[i]))
+        for i in range(len(t_done)):
+            Q_new = t_reward[i]
+            if not t_done[i]:
+                Q_new += self.gama * torch.max(self.model(t_next_state[i]))
 
-            target[i][torch.argmax(action).item] = Q_new
+            target[i][torch.argmax(t_action).item()] = Q_new
 
         # 2: Q_new =  r + gama * max(next_predicted Q value) - only do this is not done
         # pred.clone()

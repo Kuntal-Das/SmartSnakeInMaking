@@ -8,13 +8,6 @@ pygame.init()
 font = pygame.font.Font('arial.ttf', 25)
 #font = pygame.font.SysFont('arial', 25)
 
-
-# reset
-# reward
-# play(action) -> direction
-# game__iteration
-# is__collision
-
 class Direction(Enum):
     RIGHT = 1
     LEFT = 2
@@ -32,7 +25,7 @@ BLUE2 = (0, 100, 255)
 BLACK = (0, 0, 0)
 
 BLOCK_SIZE = 20
-SPEED = 20
+SPEED = 50
 
 
 class SnakeGameAI:
@@ -146,8 +139,8 @@ class SnakeGameAI:
             new_dir = clock_wise[next_dir_indx]
         elif np.array_equal(action, [0, 0, 1]):
             # Left Turn : r -> u -> -> l -> d
-            new_dir = clock_wise[next_dir_indx]
             next_dir_indx = (curr_dir_indx - 1) % 4
+            new_dir = clock_wise[next_dir_indx]
 
         self.direction = new_dir
 
