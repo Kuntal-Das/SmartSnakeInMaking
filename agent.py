@@ -7,9 +7,9 @@ from snake_game import SnakeGameAI, Direction, Point
 from model import Linear_Qnet, QTrainer
 from helper import plot
 
-MAX_MEMORY = 500_000
+MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
-LR = 0.0001
+LR = 0.001
 RECOED_FILE = './record.txt'
 
 
