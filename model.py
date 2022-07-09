@@ -19,39 +19,38 @@ class Linear_Qnet(nn.Module):
     def __init__(self, input_size, hidden_size1, hidden_size2, output_size):
         super().__init__()
         # self.model = nn.Sequential(
-        # 1 x 32 x 24
+        # 1 x 1 x 32 x 24
         self.l1 = nn.Conv2d(1, 8, kernel_size=3)
-        # 8 x 32 x 24
+        # 1 x 8 x 30 x 22
         self.l2 = nn.ReLU()
         self.l3 = nn.MaxPool2d(2, 2)
-        # 8 x 16 x 12
+        # 1 x 8 x 15 x 11
         self.l4 = nn.Conv2d(8, 16, kernel_size=(4, 3))
-        # 16 x 16 x 12
+        # 1 x 16 x 12 x 9
         self.l5 = nn.ReLU()
         self.l6 = nn.MaxPool2d(2, 2)
-        # 16 x 8 x 6
+        # 1 x 16 x 6 x 4
         self.l7 = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        self.l8 = nn.Linear(16, 3)
+        # 1 x 16 x 1 x 1
+        self.l8 = nn.Flatten(0, 2)
+        # 16
+        self.l9 = nn.Linear(16, 3)
+        # self.l9 = nn.Softmax(dim=1)
         # )
 
     def forward(self, x):
         print(x.shape)
         x = self.l1(x)
-        print(x.shape)
         x = self.l2(x)
-        print(x.shape)
         x = self.l3(x)
-        print(x.shape)
         x = self.l4(x)
-        print(x.shape)
         x = self.l5(x)
-        print(x.shape)
         x = self.l6(x)
-        print(x.shape)
         x = self.l7(x)
-        print(x.shape)
         x = self.l8(x)
+        x = self.l9(x)
         print(x.shape)
+        print(x)
         return x
 
     def save(self, file_name='model.pth'):
@@ -73,18 +72,18 @@ class QTrainer:
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
-        t_state = torch.tensor(state, dtype=torch.float).reshape(1, 32, 24)
+        t_state = torch.tensor(state, dtype=torch.float)
+        t_state = torch.unsqueeze(t_state, 0)
         t_next_state = torch.tensor(next_state, dtype=torch.float)
+        t_next_state = torch.unsqueeze(t_next_state, 0)
         t_action = torch.tensor(action, dtype=torch.float)
         t_reward = torch.tensor(reward, dtype=torch.float)
         # (n , x)
         t_done = done  # torch.tensor(done, dtype=torch.float)
 
-        print(t_state.shape)
-        if len(t_state.shape) == 1:
+        if len(t_state.shape) == 2:
             # (1, x)
             t_state = torch.unsqueeze(t_state, 0)
-            print(t_state)
             t_next_state = torch.unsqueeze(t_next_state, 0)
             t_action = torch.unsqueeze(t_action, 0)
             t_reward = torch.unsqueeze(t_reward, 0)
