@@ -8,8 +8,9 @@ from model import Linear_Qnet, QTrainer
 from helper import plot
 
 MAX_MEMORY = 500_000
-BATCH_SIZE = 2000
-LR = 0.001
+BATCH_SIZE = 1000
+LR = 0.0001
+RECOED_FILE = './record.txt'
 
 
 class Agent:
@@ -20,14 +21,35 @@ class Agent:
         self.gama = 0.9  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)
 
-        self.model = Linear_Qnet(11, 256, 3)
+        self.model = Linear_Qnet(768, 512, 256, 3)
         self.trainer = QTrainer(self.model, LR, self.gama)
 
+        # for t in self.model.parameters():
+        #     print(t.shape)
+
         if os.path.exists(model_file_path):
-            self.model.load_state_dict(torch.load(model_file_path))  # .\model\model.pth
+            self.model.load_state_dict(torch.load(
+                model_file_path))  # .\model\model.pth
             self.model.eval()
 
     def get_state(self, game):
+        state = []
+        for i in range(0, 32):
+            temp = []
+            for j in range(0, 24):
+                val = 0
+                p = Point(i*20, j*20)
+                if p in game.snake:
+                    val = 1
+                elif p == game.food:
+                    val = 100
+                temp.append(val)
+            state.append(temp)
+
+        return state
+
+    def get_state2(self, game):
+        # (640/20)x(480/20)
         head = game.snake[0]
         point_r = Point(head.x + 20, head.y)
         point_l = Point(head.x - 20, head.y)
@@ -94,7 +116,7 @@ class Agent:
         self.epsilon = 80 - self.n_games
         final_move = [0, 0, 0]
 
-        if(random.randint(0, 200) < self.epsilon):
+        if(random.randint(0, 120) < self.epsilon):
             move = random.randint(0, 2)
             final_move[move] = 1
         else:
@@ -106,11 +128,24 @@ class Agent:
         return final_move
 
 
+def load_record():
+    if os.path.exists(RECOED_FILE):
+        with open(RECOED_FILE, mode='r', encoding='utf-8') as file:
+            return file.read()
+    else:
+        return '0'
+
+
+def save_record(new_record):
+    with open(RECOED_FILE, mode='w', encoding='utf-8') as file:
+        file.write(str(new_record))
+
+
 def train():
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
-    record = 0
+    record = int(load_record())
     agent = Agent()
     game = SnakeGameAI()
 
@@ -139,6 +174,7 @@ def train():
             agent.train_long_memory()
             if score > record:
                 record = score
+                save_record(record)
                 agent.model.save()
 
             print('Game', agent.n_games, 'Score', score, 'Record', record)
