@@ -23,10 +23,7 @@ class Agent:
 
         self.model = Linear_Qnet(768, 512, 256, 3)
         self.trainer = QTrainer(self.model, LR, self.gama)
-
-        # for t in self.model.parameters():
-        #     print(t.shape)
-
+        
         if os.path.exists(model_file_path):
             self.model.load_state_dict(torch.load(
                 model_file_path))  # .\model\model.pth
@@ -116,15 +113,15 @@ class Agent:
         self.epsilon = 80 - self.n_games
         final_move = [0, 0, 0]
 
-        # if(random.randint(0, 120) < self.epsilon):
-        #     move = random.randint(0, 2)
-        #     final_move[move] = 1
-        # else:
-        state0 = torch.tensor(state, dtype=torch.float)
-        state0 = torch.unsqueeze(state0, 0)
-        prediction = self.model(state0)
-        move = torch.argmax(prediction).item()
-        final_move[move] = 1
+        if(random.randint(0, 120) < self.epsilon):
+            move = random.randint(0, 2)
+            final_move[move] = 1
+        else:
+            state0 = torch.tensor(state, dtype=torch.float).unsqueeze(0)
+            state0 = torch.unsqueeze(state0, 0)
+            prediction = self.model(state0)
+            move = torch.argmax(prediction[0]).item()
+            final_move[move] = 1
 
         return final_move
 
@@ -181,11 +178,11 @@ def train():
             print('Game', agent.n_games, 'Score', score, 'Record', record)
 
             # TODO: plot
-            plot_scores.append(score)
-            total_score += score
-            mean_score = total_score / agent.n_games
-            plot_mean_scores.append(mean_score)
-            plot(plot_scores, plot_mean_scores)
+            # plot_scores.append(score)
+            # total_score += score
+            # mean_score = total_score / agent.n_games
+            # plot_mean_scores.append(mean_score)
+            # plot(plot_scores, plot_mean_scores)
 
 
 if __name__ == "__main__":

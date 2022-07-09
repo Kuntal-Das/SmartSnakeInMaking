@@ -32,14 +32,13 @@ class Linear_Qnet(nn.Module):
         # 1 x 16 x 6 x 4
         self.l7 = nn.AdaptiveAvgPool2d(output_size=(1, 1))
         # 1 x 16 x 1 x 1
-        self.l8 = nn.Flatten(0, 2)
+        self.l8 = nn.Flatten()
         # 16
         self.l9 = nn.Linear(16, 3)
         # self.l9 = nn.Softmax(dim=1)
         # )
 
     def forward(self, x):
-        print(x.shape)
         x = self.l1(x)
         x = self.l2(x)
         x = self.l3(x)
@@ -49,8 +48,6 @@ class Linear_Qnet(nn.Module):
         x = self.l7(x)
         x = self.l8(x)
         x = self.l9(x)
-        print(x.shape)
-        print(x)
         return x
 
     def save(self, file_name='model.pth'):
@@ -72,21 +69,25 @@ class QTrainer:
         self.criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
+
         t_state = torch.tensor(state, dtype=torch.float)
-        t_state = torch.unsqueeze(t_state, 0)
         t_next_state = torch.tensor(next_state, dtype=torch.float)
-        t_next_state = torch.unsqueeze(t_next_state, 0)
         t_action = torch.tensor(action, dtype=torch.float)
         t_reward = torch.tensor(reward, dtype=torch.float)
+
+        indx = 1 if len(t_state.shape) == 3 else 0
+        t_state = t_state.unsqueeze(indx)
+        t_next_state = t_next_state.unsqueeze(indx)
+        
         # (n , x)
         t_done = done  # torch.tensor(done, dtype=torch.float)
 
-        if len(t_state.shape) == 2:
+        if len(t_state.shape) == 3:
             # (1, x)
-            t_state = torch.unsqueeze(t_state, 0)
-            t_next_state = torch.unsqueeze(t_next_state, 0)
-            t_action = torch.unsqueeze(t_action, 0)
-            t_reward = torch.unsqueeze(t_reward, 0)
+            t_state = t_state.unsqueeze(0)
+            t_next_state = t_next_state.unsqueeze(0)
+            t_action = t_action.unsqueeze(0)
+            t_reward = t_reward.unsqueeze(0)
             t_done = (done, )
 
         # 1: Predicted Q values with current state
@@ -96,7 +97,7 @@ class QTrainer:
         for i in range(len(t_done)):
             Q_new = t_reward[i]
             if not t_done[i]:
-                Q_new += self.gama * torch.max(self.model(t_next_state[i]))
+                Q_new += self.gama * torch.max(self.model(t_next_state[i].unsqueeze(0)))
 
             target[i][torch.argmax(t_action).item()] = Q_new
 
