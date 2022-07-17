@@ -37,9 +37,9 @@ class Agent:
                 val = 0
                 p = Point(i*20, j*20)
                 if p in game.snake:
-                    val = 1
-                elif p == game.food:
-                    val = 100
+                    val = 127
+                elif p in game.food:
+                    val = 255
                 temp.append(val)
             state.append(temp)
 
@@ -113,7 +113,7 @@ class Agent:
         self.epsilon = 80 - self.n_games
         final_move = [0, 0, 0]
 
-        if(random.randint(0, 120) < self.epsilon):
+        if(random.randint(0, 200) < self.epsilon):
             move = random.randint(0, 2)
             final_move[move] = 1
         else:
