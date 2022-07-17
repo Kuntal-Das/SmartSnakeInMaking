@@ -37,9 +37,9 @@ class Agent:
                 val = 0
                 p = Point(i*20, j*20)
                 if p in game.snake:
-                    val = 127
+                    val = 1
                 elif p in game.food:
-                    val = 255
+                    val = 2
                 temp.append(val)
             state.append(temp)
 

@@ -20,7 +20,9 @@ Point = namedtuple('Point', 'x, y')
 
 # rgb colors
 WHITE = (255, 255, 255)
-RED = (200, 0, 0)
+GREEN = (0, 200, 50)
+RED1 = (200, 0, 0)
+RED2 = (200, 100, 100)
 BLUE1 = (0, 0, 255)
 BLUE2 = (0, 100, 255)
 BLACK = (0, 0, 0)
@@ -47,7 +49,8 @@ class SnakeGameAI:
         self.head = Point(self.w/2, self.h/2)
         self.snake = [self.head,
                       Point(self.head.x-BLOCK_SIZE, self.head.y),
-                      Point(self.head.x-(2*BLOCK_SIZE), self.head.y)]
+                      Point(self.head.x-(2*BLOCK_SIZE), self.head.y),
+                      Point(self.head.x-(3*BLOCK_SIZE), self.head.y)]
 
         self.score = 0
         self.food = []
@@ -57,7 +60,7 @@ class SnakeGameAI:
     def _place_food(self, num=1):
         if len(self.food) >= num:
             return
-            
+
         i = 0
         while(i <= num):
             x = random.randint(0, (self.w-BLOCK_SIZE)//BLOCK_SIZE)*BLOCK_SIZE
@@ -124,13 +127,20 @@ class SnakeGameAI:
     def _update_ui(self):
         self.display.fill(BLACK)
 
-        for pt in self.snake:
-            pygame.draw.rect(self.display, BLUE1, pygame.Rect(
-                pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.display, BLUE2,
-                             pygame.Rect(pt.x+4, pt.y+4, 12, 12))
+        for i in range(len(self.snake)):
+            pt = self.snake[i]
+            if i == 0:
+                pygame.draw.rect(self.display, RED1, pygame.Rect(
+                    pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+                pygame.draw.rect(self.display, RED2,
+                                 pygame.Rect(pt.x+4, pt.y+4, 12, 12))
+            else:
+                pygame.draw.rect(self.display, BLUE1, pygame.Rect(
+                    pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+                pygame.draw.rect(self.display, BLUE2,
+                                 pygame.Rect(pt.x+4, pt.y+4, 12, 12))
         for pt in self.food:
-            pygame.draw.rect(self.display, RED, pygame.Rect(
+            pygame.draw.rect(self.display, GREEN, pygame.Rect(
                 pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
 
         text = font.render("Score: " + str(self.score), True, WHITE)

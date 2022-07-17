@@ -2,6 +2,7 @@ from mimetypes import init
 from pathlib import Path
 from turtle import forward
 import torch
+import torchvision
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
@@ -18,11 +19,12 @@ import os
 class Linear_Qnet(nn.Module):
     def __init__(self, input_size, hidden_size1, hidden_size2, output_size):
         super().__init__()
-        self.input_layer = nn.Sequential(  # 1 x 1 x 32 x 24
+        self.pading = torchvision.transforms.Pad(1, -1)
+        self.conv1_layer1 = nn.Sequential(  # 1 x 1 x 32 x 24
             nn.Conv2d(1, 8, kernel_size=3),  # 1 x 8 x 30 x 22
             nn.ReLU(),
             nn.MaxPool2d(2, 2))  # 1 x 8 x 15 x 11
-        self.conv_layer = nn.Sequential(
+        self.conv_layer2 = nn.Sequential(
             nn.Conv2d(8, 16, kernel_size=(4, 3)),  # 1 x 16 x 12 x 9
             nn.ReLU(),
             nn.MaxPool2d(2, 2))  # 1 x 16 x 6 x 4
@@ -34,10 +36,17 @@ class Linear_Qnet(nn.Module):
         self.output_layer = nn.Linear(16, 3)  # self.l9 = nn.Softmax(dim=1)
 
     def forward(self, x):
-        x = self.input_layer(x)
-        x = self.conv_layer(x)
+        # print(x)
+        x = self.pading(x)
+        # print(x)
+        x = self.conv1_layer1(x)
+        # print(x)
+        x = self.conv_layer2(x)
+        # print(x)
         x = self.linear_layer(x)
+        # print(x)
         x = self.output_layer(x)
+        # print(x)
         return x
 
     def save(self, file_name='model.pth'):
